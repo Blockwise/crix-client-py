@@ -24,7 +24,7 @@ setuptools.setup(
     classifiers=[
         'Programming Language :: Python :: 3.5',
         'Operating System :: OS Independent',
-        'License :: Other/Proprietary License',
+        'License :: OSI Approved :: MIT License',
         'Topic :: Office/Business :: Financial'
     ]
 )

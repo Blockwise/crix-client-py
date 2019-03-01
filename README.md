@@ -1,7 +1,6 @@
 # CRIX.io official client
 
 **TODO**
-* license and to setup.py
 * all orders
 * publish to pip
 
@@ -15,7 +14,7 @@ Environment requirements:
 For several operations like create/cancel orders you should
 also be registered in the exchange and got BOT API token and secret.
 
-To access historical you should get explicit permission by exchange support.
+To access historical data you should get explicit permission by exchange support.
 
 ## Installation
 
