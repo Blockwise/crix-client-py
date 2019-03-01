@@ -1,8 +1,5 @@
 # CRIX.io official client
 
-**TODO**
-* all orders
-* publish to pip
 
 This official client of CRIX.io crypto exchange.
 

@@ -139,8 +139,23 @@ class AuthorizedClient(Client):
                 yield Order.from_json(info)
 
     def fetch_closed_orders(self, *symbols: str, limit: int = 1000) -> Iterator[Order]:
-        # TODO: fetch closed orders
-        raise NotImplementedError('fetch closed orders will be implemented soon')
+        """
+        Get complete (filled, canceled) orders for user
+        :param symbols: filter orders by symbols. if not specified - used all symbols
+        :param limit: maximum number of orders for each symbol
+        :return: iterator of orders definitions
+        """
+        if len(symbols) == 0:
+            symbols = [sym.name for sym in self.fetch_markets()]
+        for symbol in symbols:
+            response = self.__signed_request('fetch-closed-orders', self._base_url + '/user/orders/complete', {
+                'req': {
+                    'limit': limit,
+                    'symbolName': symbol
+                }
+            })
+            for info in (response['orders'] or []):
+                yield Order.from_json(info)
 
     def fetch_orders(self, *symbols: str, limit: int = 1000) -> Iterator[Order]:
         """
