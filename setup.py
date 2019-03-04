@@ -9,7 +9,6 @@ with open('requirements.txt', 'r') as f:
             line.strip(' \n') for line in f
         ] if not s.startswith('#') and s != ''
     ]
-
 setuptools.setup(
     name='crix',
     version='1.0',
@@ -21,6 +20,7 @@ setuptools.setup(
     url='https://github.com/blockwise/crix-client-py',
     packages=setuptools.find_packages(),
     install_requires=install_reqs,
+    setup_requires=['wheel'],
     classifiers=[
         'Programming Language :: Python :: 3.5',
         'Operating System :: OS Independent',

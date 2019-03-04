@@ -1,3 +1,6 @@
 venv
 .idea/*
 test.py
+build
+dist
+*.egg-info
