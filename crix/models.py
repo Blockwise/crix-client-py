@@ -25,6 +25,9 @@ class Symbol(NamedTuple):
 
     @staticmethod
     def from_json(info: dict) -> 'Symbol':
+        """
+        Construct object from dictionary
+        """
         return Symbol(
             name=info['symbolName'],
             base=info['base'],
@@ -49,7 +52,7 @@ class Symbol(NamedTuple):
 class Ticker(NamedTuple):
     symbol_name: str
     open_time: datetime
-    open: Decimal
+    open: Decimal  # type: Decimal
     close: Decimal
     high: Decimal
     low: Decimal
@@ -58,6 +61,9 @@ class Ticker(NamedTuple):
 
     @staticmethod
     def from_json(info: dict) -> 'Ticker':
+        """
+        Construct object from dictionary
+        """
         return Ticker(
             symbol_name=info['symbolName'],
             open_time=datetime.fromtimestamp(info['openTime'] / 1000.0),
@@ -71,6 +77,9 @@ class Ticker(NamedTuple):
 
     @staticmethod
     def from_json_history(info: dict) -> 'Ticker':
+        """
+        Construct object from dictionary (for a fixed resolution)
+        """
         return Ticker(
             symbol_name=info['currency'],
             open_time=datetime.fromtimestamp(info['timestamp']),
@@ -101,6 +110,9 @@ class Ticker24(NamedTuple):
 
     @staticmethod
     def from_json(info: dict) -> 'Ticker24':
+        """
+        Construct object from dictionary
+        """
         return Ticker24(
             symbol_name=info['symbolName'],
             open_time=datetime.fromtimestamp(info['openTime'] / 1000.0),
@@ -125,6 +137,9 @@ class Offer(NamedTuple):
 
     @staticmethod
     def from_json(info: dict) -> 'Offer':
+        """
+        Construct object from dictionary
+        """
         return Offer(
             count=info['c'],
             price=Decimal(info['p']),
@@ -142,6 +157,9 @@ class Depth(NamedTuple):
 
     @staticmethod
     def from_json(info: dict) -> 'Depth':
+        """
+        Construct object from dictionary
+        """
         return Depth(
             symbol_name=info['symbolName'],
             level_aggregation=info['levelAggregation'],
@@ -192,6 +210,9 @@ class Order(NamedTuple):
 
     @staticmethod
     def from_json(info: dict) -> 'Order':
+        """
+        Construct object from dictionary
+        """
         return Order(
             id=info['orderId'],
             user_id=info['userId'],
@@ -218,6 +239,9 @@ class NewOrder(NamedTuple):
     expire_time: Optional[datetime] = None
 
     def to_json(self) -> dict:
+        """
+        Build JSON package ready to send to the API endpoint
+        """
         req = {
             "isBuy": self.is_buy,
             "price": str(self.price),
@@ -232,15 +256,35 @@ class NewOrder(NamedTuple):
         return req
 
     @staticmethod
-    def limit(symbol: str, is_buy: bool, price: Decimal, quantity: Decimal, **args) -> 'NewOrder':
+    def limit(symbol: str, is_buy: bool, price: Union[Decimal, float, str], quantity: Union[Decimal, float, str],
+              **args) -> 'NewOrder':
+        """
+        Helper to create basic limit order
+
+        :param symbol: symbol name as defined by the exchange
+        :param is_buy: order direction
+        :param price: order price
+        :param quantity: number of items in the order
+        :param args: additional parameters proxied to the NewOrder constructor
+        :return: new order
+        """
         return NewOrder(symbol=symbol,
-                        price=price,
-                        quantity=quantity,
+                        price=Decimal(price),
+                        quantity=Decimal(quantity),
                         is_buy=is_buy,
                         **args)
 
     @staticmethod
     def market(symbol: str, is_buy: bool, quantity: Union[Decimal, float, str], **args) -> 'NewOrder':
+        """
+        Helper to create basic market order
+
+        :param symbol: symbol name as defined by the exchange
+        :param is_buy: order direction
+        :param quantity: number of items
+        :param args: additional parameters proxied to the NewOrder constructor
+        :return: new order
+        """
         return NewOrder(symbol=symbol,
                         price=Decimal('0'),
                         quantity=Decimal(quantity),
@@ -269,6 +313,9 @@ class Trade(NamedTuple):
 
     @staticmethod
     def from_json(info: dict) -> 'Trade':
+        """
+        Construct object from dictionary
+        """
         return Trade(
             id=info['id'],
             created_at=datetime.fromtimestamp(info['createdAt'] / 1000),
@@ -298,6 +345,9 @@ class Account(NamedTuple):
 
     @staticmethod
     def from_json(info: dict) -> 'Account':
+        """
+        Construct object from dictionary
+        """
         return Account(
             id=info['id'],
             user_id=info['userId'],

@@ -8,6 +8,13 @@ import hmac
 
 
 class APIError(RuntimeError):
+    """
+    General exception for API calls
+    """
+
+    operation: str  #: operation name
+    code: int  #: HTTP response code
+    text: str  #: error description
 
     def __init__(self, operation: str, code: int, text: str) -> None:
         self.code = code
@@ -17,11 +24,25 @@ class APIError(RuntimeError):
 
     @staticmethod
     def ensure(operation: str, req: requests.Response):
+        """
+        Ensure status code of HTTP request and raise exception if needed
+
+        :param operation: logical operation name
+        :param req: request's response object
+        """
         if req.status_code not in (200, 204):
             raise APIError(operation, req.status_code, req.text)
 
 
 class Client:
+    """
+    HTTP client to the exchange for non-authorized requests.
+
+    Supported environments:
+
+    - 'mvp' - testnet sandbox with full-wipe each 2nd week (usually)
+    - 'prod' - mainnet, production environment with real currency
+    """
 
     def __init__(self, *, env: str = 'mvp'):
         self.environment = env
@@ -34,6 +55,7 @@ class Client:
     def fetch_currency_codes(self) -> List[str]:
         """
         Get list of currencies codes in quote_base format (ex. btc_bch)
+
         :return: list of formatted currencies codes
         """
         return [(sym.base + "_" + sym.quote).lower() for sym in self.fetch_markets()]
@@ -42,6 +64,7 @@ class Client:
         """
         Get list of all symbols on the exchange. Also includes symbol details like precision, quote, base and e.t.c.
         It's a good idea to cache result of this function after first invoke
+
         :return: list of supported symbols
         """
         symbols = []
@@ -55,6 +78,7 @@ class Client:
     def fetch_order_book(self, symbol: str, level_aggregation: Optional[int] = None) -> Depth:
         """
         Get order book for specific symbol and level aggregation
+
         :param symbol: interesting symbol name
         :param level_aggregation: aggregate by rounding numbers (if not defined - no aggregation)
         :return: order depth book
@@ -73,6 +97,7 @@ class Client:
     def fetch_ticker(self) -> List[Ticker24]:
         """
         Get tickers for all symbols for the last 24 hours
+
         :return: list of tickers
         """
         tickers = []
@@ -88,6 +113,7 @@ class Client:
                     limit: int = 10) -> List[Ticker]:
         """
         Get K-Lines for specific symbol in a time frame
+
         :param symbol: K-Line symbol name
         :param utc_start_time: earliest interesting time
         :param utc_end_time: latest interesting time
@@ -113,6 +139,17 @@ class Client:
 
 
 class AuthorizedClient(Client):
+    """
+    HTTP client to the exchange for non-authorized and authorized requests.
+
+    Supported environments:
+
+    - 'mvp' - testnet sandbox with full-wipe each 2nd week (usually)
+    - 'prod' - mainnet, production environment with real currency
+
+    Expects API token and API secret provided by CRIX.IO exchange as
+    part of bot API.
+    """
 
     def __init__(self, token: str, secret: str, *, env: str = 'mvp'):
         super().__init__(env=env)
@@ -121,8 +158,15 @@ class AuthorizedClient(Client):
 
     def fetch_open_orders(self, *symbols: str, limit: int = 1000) -> Iterator[Order]:
         """
-        Get all open orders for the user
-        :param symbols: filter orders by symbols. if not specified - used all symbols
+        Get all open orders for the user.
+
+        .. note::
+            One request per each symbol will be made plus additional
+            request to query all supported symbols if symbols parameter
+            not specified.
+
+
+        :param symbols: filter orders by symbols. if not specified - all symbols queried and used
         :param limit: maximum number of orders for each symbol
         :return: iterator of orders definitions
         """
@@ -141,7 +185,13 @@ class AuthorizedClient(Client):
     def fetch_closed_orders(self, *symbols: str, limit: int = 1000) -> Iterator[Order]:
         """
         Get complete (filled, canceled) orders for user
-        :param symbols: filter orders by symbols. if not specified - used all symbols
+
+        .. note::
+            One request per each symbol will be made plus additional
+            request to query all supported symbols if symbols parameter
+            not specified.
+
+        :param symbols: filter orders by symbols. if not specified - all symbols queried and used
         :param limit: maximum number of orders for each symbol
         :return: iterator of orders definitions
         """
@@ -162,6 +212,11 @@ class AuthorizedClient(Client):
         Get opened and closed orders filtered by symbols. If no symbols specified - all symbols are used.
         Basically the function acts as union of fetch_open_orders and fetch_closed_orders.
 
+        .. note::
+            Two requests per each symbol will be made plus additional
+            request to query all supported symbols if symbols parameter
+            not specified.
+
         :param symbols: symbols: filter orders by symbols. if not specified - used all symbols
         :param limit: maximum number of orders for each symbol for each state (open, close)
         :return: iterator of orders definitions sorted from open to close
@@ -178,6 +233,12 @@ class AuthorizedClient(Client):
         """
         Get all trades for the user. There is some gap (a few ms) between time when trade is actually created and time
         when it becomes visible for the user.
+
+        .. note::
+            One request per each symbol will be made plus additional
+            request to query all supported symbols if symbols parameter
+            not specified.
+
         :param symbols: filter trades by symbols. if not specified - used all symbols
         :param limit: maximum number of trades for each symbol
         :return: iterator of trade definition
@@ -197,6 +258,7 @@ class AuthorizedClient(Client):
     def fetch_balance(self) -> List[Account]:
         """
         Get all balances for the user
+
         :return: list of all accounts
         """
         response = self.__signed_request('fetch-balance', self._base_url + '/user/accounts', {})
@@ -205,6 +267,7 @@ class AuthorizedClient(Client):
     def cancel_order(self, order_id: int, symbol: str) -> Order:
         """
         Cancel placed order
+
         :param order_id: order id generated by the exchange
         :param symbol: symbol names same as in placed order
         :return: order definition with filled field (also includes filled quantity)
@@ -220,6 +283,7 @@ class AuthorizedClient(Client):
     def create_order(self, new_order: NewOrder) -> Order:
         """
         Create and place order to the exchange
+
         :param new_order: order parameters
         :return: order definition with filled fields from the exchange
         """
@@ -231,6 +295,7 @@ class AuthorizedClient(Client):
     def fetch_order(self, order_id: int, symbol_name: str) -> Optional[Order]:
         """
         Fetch single open order info
+
         :param order_id: order id generated by server during 'create_order' phase
         :param symbol_name: symbol name same as in order
         :return: order definition or None if nothing found
@@ -253,11 +318,12 @@ class AuthorizedClient(Client):
         """
         Get historical minute tickers for specified time range and currency
         There are several caveats:
-        * it requires additional permission
-        * end param should be not more then server time, otherwise error returned
-        * maximum difference between earliest and latest date should be no more then 366 days
-        * it could be slow for a long time range
-        * mostly all points have 1 minute tick however in a very few cases gap can be a bit bigger
+
+        - it requires additional permission
+        - end param should be not more then server time, otherwise error returned
+        - maximum difference between earliest and latest date should be no more then 366 days
+        - it could be slow for a long time range
+        - mostly all points have 1 minute tick however in a very few cases gap can be a bit bigger
 
         :param begin: earliest interesting time
         :param end: latest interesting time
