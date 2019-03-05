@@ -2,6 +2,7 @@
 ![PyPI - License](https://img.shields.io/pypi/l/crix.svg)
 ![PyPI](https://img.shields.io/pypi/v/crix.svg)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/crix.svg)
+[![Documentation Status](https://readthedocs.org/projects/crix/badge/?version=latest)](https://crix.readthedocs.io/en/latest/?badge=latest)
 
 This official client of CRIX.io crypto exchange.
 

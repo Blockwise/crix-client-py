@@ -14,7 +14,6 @@
 #
 import os
 import sys
-from typing import NamedTuple
 
 sys.path.insert(0, os.path.abspath('..'))
 
