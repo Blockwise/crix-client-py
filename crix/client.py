@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Iterator, Optional
+from typing import List, Iterator, Optional, Tuple
 from .models import Ticker, Resolution, NewOrder, Order, Symbol, Depth, Trade, Account, Ticker24
 
 import requests
@@ -42,15 +42,20 @@ class Client:
 
     - 'mvp' - testnet sandbox with full-wipe each 2nd week (usually)
     - 'prod' - mainnet, production environment with real currency
+
+    Disable `cache_market` if latest symbols info are always required
     """
 
-    def __init__(self, *, env: str = 'mvp'):
+    def __init__(self, *, env: str = 'mvp', cache_market: bool = True):
         self.environment = env
         if env == 'prod':
             self._base_url = 'https://crix.io'
         else:
             self._base_url = 'https://{}.crix.io'.format(env)
         self._base_url += '/api/v1'
+        self.__cache_market = cache_market
+        self.__market_cache = None
+        self._session = requests.Session()
 
     def fetch_currency_codes(self) -> List[str]:
         """
@@ -60,20 +65,23 @@ class Client:
         """
         return [(sym.base + "_" + sym.quote).lower() for sym in self.fetch_markets()]
 
-    def fetch_markets(self) -> List[Symbol]:
+    def fetch_markets(self, force: bool = False) -> Tuple[Symbol]:
         """
         Get list of all symbols on the exchange. Also includes symbol details like precision, quote, base and e.t.c.
         It's a good idea to cache result of this function after first invoke
 
+        :param force: don't use cached symbols
         :return: list of supported symbols
         """
-        symbols = []
-        req = requests.get(self._base_url + '/info/symbols')
-        APIError.ensure('fetch-markets', req)
-        data = req.json()
-        for info in (data['symbol'] or []):
-            symbols.append(Symbol.from_json(info))
-        return symbols
+        if not self.__cache_market or force or self.__market_cache is None:
+            symbols = []
+            req = self._session.get(self._base_url + '/info/symbols')
+            APIError.ensure('fetch-markets', req)
+            data = req.json()
+            for info in (data['symbol'] or []):
+                symbols.append(Symbol.from_json(info))
+            self.__market_cache = tuple(symbols)
+        return self.__market_cache
 
     def fetch_order_book(self, symbol: str, level_aggregation: Optional[int] = None) -> Depth:
         """
@@ -88,7 +96,7 @@ class Client:
         }
         if level_aggregation is not None:
             req['levelAggregation'] = level_aggregation
-        req = requests.post(self._base_url + '/depths', json={
+        req = self._session.post(self._base_url + '/depths', json={
             'req': req
         })
         APIError.ensure('fetch-order-book', req)
@@ -101,7 +109,7 @@ class Client:
         :return: list of tickers
         """
         tickers = []
-        req = requests.get(self._base_url + '/tickers24')
+        req = self._session.get(self._base_url + '/tickers24')
         APIError.ensure('ticker', req)
         data = req.json()
         for info in data['ohlc']:
@@ -122,7 +130,7 @@ class Client:
         :return: list of ticker
         """
         tickers = []
-        req = requests.post(self._base_url + '/klines', json={
+        req = self._session.post(self._base_url + '/klines', json={
             'req': {
                 'startTime': int(utc_start_time.timestamp() * 1000),
                 'endTime': int(utc_end_time.timestamp() * 1000),
@@ -151,8 +159,8 @@ class AuthorizedClient(Client):
     part of bot API.
     """
 
-    def __init__(self, token: str, secret: str, *, env: str = 'mvp'):
-        super().__init__(env=env)
+    def __init__(self, token: str, secret: str, *, env: str = 'mvp', cache_market: bool = True):
+        super().__init__(env=env, cache_market=cache_market)
         self.__token = token
         self.__secret = secret
 
@@ -349,6 +357,6 @@ class AuthorizedClient(Client):
         headers = {
             'X-Api-Signed-Token': self.__token + ',' + signature,
         }
-        req = requests.post(url, data=payload, headers=headers)
+        req = self._session.post(url, data=payload, headers=headers)
         APIError.ensure(operation, req)
         return req.json()
