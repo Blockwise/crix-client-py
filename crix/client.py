@@ -87,6 +87,21 @@ class Client:
         """
         Get order book for specific symbol and level aggregation
 
+        .. highlight:: python
+        .. code-block:: python
+
+            import os
+            import crix
+
+            client = crix.AuthorizedClient(token=os.getenv('TOKEN'),
+                                           secret=os.getenv('SECRET'),
+                                           env='mvp')
+            # get all symbols
+            symbols = client.fetch_markets()
+            for symbol in symbols:
+                # get order book for symbol
+                order_book = client.fetch_order_book(symbol.name)
+
         :param symbol: interesting symbol name
         :param level_aggregation: aggregate by rounding numbers (if not defined - no aggregation)
         :return: order depth book
