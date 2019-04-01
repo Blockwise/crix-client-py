@@ -56,7 +56,7 @@ class Ticker(NamedTuple):
     close: Decimal
     high: Decimal
     low: Decimal
-    volume: Decimal
+    volume: Decimal  # in base
     resolution: str
 
     @staticmethod
@@ -99,7 +99,7 @@ class Ticker24(NamedTuple):
     close: Decimal
     high: Decimal
     low: Decimal
-    volume: Decimal
+    volume: Decimal  # in base
     resolution: str
     # extended info
     first_id: int
@@ -207,6 +207,7 @@ class Order(NamedTuple):
     time_in_force: TimeInForce
     expire_time: Optional[datetime]
     status: OrderStatus
+    created_at: datetime
 
     @staticmethod
     def from_json(info: dict) -> 'Order':
@@ -225,7 +226,8 @@ class Order(NamedTuple):
             time_in_force=TimeInForce(info['timeInForce']),
             expire_time=datetime.fromtimestamp(info['expireTime'] / 1000) if info['expireTime'] and info[
                 'expireTime'] > 0 else None,
-            status=OrderStatus(info['status'])
+            status=OrderStatus(info['status']),
+            created_at=datetime.fromtimestamp(info.get('created_at', 0) / 1000),
         )
 
 
