@@ -297,6 +297,7 @@ class NewOrder(NamedTuple):
 
 class Trade(NamedTuple):
     id: int
+    user_id: int
     created_at: datetime
     last_updated_at: datetime
     order_filled: bool
@@ -325,6 +326,7 @@ class Trade(NamedTuple):
             fee=Decimal(info['fee'] or '0'),
             fee_currency=info['feeCurrency'],
             symbol_name=info['symbolName'],
+            user_id=info.get('userId', 0),
         )
 
 
