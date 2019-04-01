@@ -298,13 +298,8 @@ class NewOrder(NamedTuple):
 class Trade(NamedTuple):
     id: int
     created_at: datetime
-    buy_user_id: int
-    buy_order_id: int
-    is_buy_order_filled: bool
-    sell_user_id: int
-    sell_order_id: int
-    is_sell_order_filled: bool
-
+    last_updated_at: datetime
+    order_filled: bool
     is_buy: bool
     order_id: int
     price: Decimal
@@ -321,12 +316,8 @@ class Trade(NamedTuple):
         return Trade(
             id=info['id'],
             created_at=datetime.fromtimestamp(info['createdAt'] / 1000),
-            buy_user_id=info['buyUserId'],
-            buy_order_id=info['buyOrderId'],
-            is_buy_order_filled=info['buyOrderFilled'],
-            sell_user_id=info['sellUserId'],
-            sell_order_id=info['sellOrderId'],
-            is_sell_order_filled=info['sellOrderFilled'],
+            last_updated_at=datetime.fromtimestamp(info.get('lastUpdateAt', 0) / 1000),
+            order_filled=info.get('orderFilled', False),
             is_buy=info['isBuy'],
             order_id=info['orderId'],
             price=Decimal(info['price']),
