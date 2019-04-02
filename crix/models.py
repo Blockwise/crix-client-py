@@ -207,7 +207,8 @@ class Order(NamedTuple):
     time_in_force: TimeInForce
     expire_time: Optional[datetime]
     status: OrderStatus
-    created_at: datetime
+    created_at: datetime  # matches server time when order was placed to the order book
+    last_updated_at: datetime  # match server time when order status changed
 
     @staticmethod
     def from_json(info: dict) -> 'Order':
@@ -228,6 +229,7 @@ class Order(NamedTuple):
                 'expireTime'] > 0 else None,
             status=OrderStatus(info['status']),
             created_at=datetime.fromtimestamp(info.get('createdAt', 0) / 1000),
+            last_updated_at=datetime.fromtimestamp(info.get('lastUpdateAt', 0) / 1000),
         )
 
 
@@ -297,12 +299,11 @@ class NewOrder(NamedTuple):
 
 class Trade(NamedTuple):
     id: int
-    user_id: int
+    user_id: int  # matches user account that made an order
     created_at: datetime
-    last_updated_at: datetime
-    order_filled: bool
+    order_filled: bool  # matches order filling state (complete or not)
     is_buy: bool
-    order_id: int
+    order_id: int  # matches original order id (buy or sell)
     price: Decimal
     quantity: Decimal
     fee: Decimal
@@ -317,7 +318,6 @@ class Trade(NamedTuple):
         return Trade(
             id=info['id'],
             created_at=datetime.fromtimestamp(info['createdAt'] / 1000),
-            last_updated_at=datetime.fromtimestamp(info.get('lastUpdateAt', 0) / 1000),
             order_filled=info.get('orderFilled', False),
             is_buy=info['isBuy'],
             order_id=info['orderId'],

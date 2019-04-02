@@ -135,7 +135,10 @@ class Client:
                     resolution: Resolution = Resolution.one_minute,
                     limit: int = 10) -> List[Ticker]:
         """
-        Get K-Lines for specific symbol in a time frame
+        Get K-Lines for specific symbol in a time frame.
+
+        Latest OHLCV ticks representing interval up to current minute
+        (ex: now: 10:15:32, then latest OHLCV with minute resolution will be from 10:14:00 to 10:15:00).
 
         :param symbol: K-Line symbol name
         :param utc_start_time: earliest interesting time
