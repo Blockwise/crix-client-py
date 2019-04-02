@@ -227,7 +227,7 @@ class Order(NamedTuple):
             expire_time=datetime.fromtimestamp(info['expireTime'] / 1000) if info['expireTime'] and info[
                 'expireTime'] > 0 else None,
             status=OrderStatus(info['status']),
-            created_at=datetime.fromtimestamp(info.get('created_at', 0) / 1000),
+            created_at=datetime.fromtimestamp(info.get('createdAt', 0) / 1000),
         )
 
 
