@@ -11,7 +11,7 @@ with open('requirements.txt', 'r') as f:
     ]
 setuptools.setup(
     name='crix',
-    version='1.2',
+    version='1.3',
     author='Baryshnikov Aleksandr (reddec)',
     author_email='ab@crix.io',
     description='CRIX.IO official client',
