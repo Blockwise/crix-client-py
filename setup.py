@@ -11,7 +11,7 @@ with open('requirements.txt', 'r') as f:
     ]
 setuptools.setup(
     name='crix',
-    version='1.3',
+    version='1.4',
     author='Baryshnikov Aleksandr (reddec)',
     author_email='ab@crix.io',
     description='CRIX.IO official client',
@@ -22,7 +22,7 @@ setuptools.setup(
     install_requires=install_reqs,
     setup_requires=['wheel'],
     classifiers=[
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Operating System :: OS Independent',
         'License :: OSI Approved :: MIT License',
         'Topic :: Office/Business :: Financial'

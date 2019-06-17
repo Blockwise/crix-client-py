@@ -4,11 +4,11 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/crix.svg)
 [![Documentation Status](https://readthedocs.org/projects/crix/badge/?version=latest)](https://crix.readthedocs.io/en/latest/?badge=latest)
 
-This official client of CRIX.io crypto exchange.
+This official client of CRIX.io crypto exchange. Supports both synchronous and asynchronous approach
 
 Environment requirements:
 
-* python 3.5+
+* python 3.6+
 * requests 2.* 
 
 For several operations like create/cancel orders you should
@@ -19,7 +19,7 @@ To access historical data you should get explicit permission by exchange support
 ## Installation
 
 * over pip: `pip install crix`
-* manually: `pip install git+https://github.com/blockwise/crix-client-py.git#egg=crix`
+* manually (dev): `pip install git+https://github.com/blockwise/crix-client-py.git#egg=crix`
 
 ## Sample usage
 
