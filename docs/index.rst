@@ -86,6 +86,29 @@ Authorized (clients-only) access
    print(order)
 
 
+Authorized asynchronous access - get balance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: python
+
+   import crix
+   from crix.models import NewOrder
+   from aiohttp import ClientSession
+
+
+   async def run():
+      # initialize HTTP(s) session
+      async with ClientSession() as session:
+         client = crix.AsyncAuthorizedClient(token='xxyyzz',
+                                            secret='aabbcc',
+                                            env='prod',
+                                            session=session) # replace token and secret value for your personal API credentials
+         # list opened and closed orders
+         async for x in client.fetch_orders('ETH_BTC'):
+            print(x)
+
+
+   asyncio.get_event_loop().run_until_complete(run())
+
 
 .. toctree::
    :maxdepth: 2

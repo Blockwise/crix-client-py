@@ -216,9 +216,9 @@ class AsyncAuthorizedClient(AsyncClient):
             markets = await self.fetch_markets()
             symbols = [sym.name for sym in markets]
         for symbol in symbols:
-            for order in self.fetch_open_orders(symbol, limit=limit):
+            async for order in self.fetch_open_orders(symbol, limit=limit):
                 yield order
-            for order in self.fetch_closed_orders(symbol, limit=limit):
+            async for order in self.fetch_closed_orders(symbol, limit=limit):
                 yield order
 
     async def fetch_my_trades(self, *symbols: str, limit: int = 1000) -> AsyncIterator[Trade]:
