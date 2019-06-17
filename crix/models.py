@@ -52,7 +52,7 @@ class Symbol(NamedTuple):
 class Ticker(NamedTuple):
     symbol_name: str
     open_time: datetime
-    open: Decimal  # type: Decimal
+    open: Decimal
     close: Decimal
     high: Decimal
     low: Decimal

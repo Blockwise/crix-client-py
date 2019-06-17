@@ -1,11 +1,14 @@
-from datetime import datetime
-from typing import List, Iterator, Optional, Tuple
-from .models import Ticker, Resolution, NewOrder, Order, Symbol, Depth, Trade, Account, Ticker24
-from aiohttp import ClientResponse
-
-import requests
 import json
 import hmac
+
+from datetime import datetime
+from typing import List, Iterator, Optional, Tuple
+
+import requests
+
+from aiohttp import ClientResponse
+
+from .models import Ticker, Resolution, NewOrder, Order, Symbol, Depth, Trade, Account, Ticker24
 
 
 class APIError(RuntimeError):
@@ -209,7 +212,7 @@ class AuthorizedClient(Client):
         :param limit: maximum number of orders for each symbol
         :return: iterator of orders definitions
         """
-        if len(symbols) == 0:
+        if not symbols:
             symbols = [sym.name for sym in self.fetch_markets()]
         for symbol in symbols:
             response = self.__signed_request('fetch-open-orders', self._base_url + '/user/orders/open', {
@@ -234,7 +237,7 @@ class AuthorizedClient(Client):
         :param limit: maximum number of orders for each symbol
         :return: iterator of orders definitions
         """
-        if len(symbols) == 0:
+        if not symbols:
             symbols = [sym.name for sym in self.fetch_markets()]
         for symbol in symbols:
             response = self.__signed_request('fetch-closed-orders', self._base_url + '/user/orders/complete', {
@@ -260,7 +263,7 @@ class AuthorizedClient(Client):
         :param limit: maximum number of orders for each symbol for each state (open, close)
         :return: iterator of orders definitions sorted from open to close
         """
-        if len(symbols) == 0:
+        if not symbols:
             symbols = [sym.name for sym in self.fetch_markets()]
         for symbol in symbols:
             for order in self.fetch_open_orders(symbol, limit=limit):
@@ -282,7 +285,7 @@ class AuthorizedClient(Client):
         :param limit: maximum number of trades for each symbol
         :return: iterator of trade definition
         """
-        if len(symbols) == 0:
+        if not symbols:
             symbols = [sym.name for sym in self.fetch_markets()]
         for symbol in symbols:
             response = self.__signed_request('fetch-my-trades', self._base_url + '/user/trades', {
@@ -349,8 +352,7 @@ class AuthorizedClient(Client):
         except APIError as err:
             if 'not found' in err.text:
                 return None
-            else:
-                raise
+            raise
         return Order.from_json(response)
 
     def fetch_history(self, begin: datetime, end: datetime, currency: str) -> Iterator[Ticker]:

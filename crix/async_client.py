@@ -1,12 +1,14 @@
-from datetime import datetime
-from typing import List, Optional, Tuple, AsyncIterator
-
-from crix import APIError
-from .models import Ticker, Resolution, NewOrder, Order, Symbol, Depth, Trade, Account, Ticker24
-
-from aiohttp import ClientSession
 import json
 import hmac
+from datetime import datetime
+from typing import List, Optional, Tuple, AsyncIterator
+from aiohttp import ClientSession
+
+from .client import APIError
+from .models import Ticker, Resolution, NewOrder, Order, Symbol, Depth, Trade, Account, Ticker24
+
+
+
 
 
 class AsyncClient:
@@ -73,9 +75,7 @@ class AsyncClient:
         if level_aggregation is not None:
             req['levelAggregation'] = level_aggregation
 
-        async with self._session.post(self._base_url + '/depths', json={
-            'req': req
-        }) as req:
+        async with self._session.post(self._base_url + '/depths', json={'req': req}) as req:
             await APIError.async_ensure('fetch-order-book', req)
             return Depth.from_json(await req.json())
 
@@ -110,15 +110,16 @@ class AsyncClient:
         :return: list of ticker
         """
         tickers = []
-        async with self._session.post(self._base_url + '/klines', json={
-            'req': {
-                'startTime': int(utc_start_time.timestamp() * 1000),
-                'endTime': int(utc_end_time.timestamp() * 1000),
-                'symbolName': symbol,
-                'resolution': resolution.value,
-                'limit': limit,
-            }
-        }) as req:
+        async with self._session.post(self._base_url + '/klines',
+                                      json={
+                                          'req': {
+                                              'startTime': int(utc_start_time.timestamp() * 1000),
+                                              'endTime': int(utc_end_time.timestamp() * 1000),
+                                              'symbolName': symbol,
+                                              'resolution': resolution.value,
+                                              'limit': limit,
+                                          }
+                                      }) as req:
             await APIError.async_ensure('fetch-ohlcv', req)
             data = await req.json()
         for info in (data['ohlc'] or []):
@@ -159,7 +160,7 @@ class AsyncAuthorizedClient(AsyncClient):
         :param limit: maximum number of orders for each symbol
         :return: iterator of orders definitions
         """
-        if len(symbols) == 0:
+        if not symbols:
             markets = await self.fetch_markets()
             symbols = [sym.name for sym in markets]
         for symbol in symbols:
@@ -185,7 +186,7 @@ class AsyncAuthorizedClient(AsyncClient):
         :param limit: maximum number of orders for each symbol
         :return: iterator of orders definitions
         """
-        if len(symbols) == 0:
+        if not symbols:
             markets = await self.fetch_markets()
             symbols = [sym.name for sym in markets]
         for symbol in symbols:
@@ -212,7 +213,7 @@ class AsyncAuthorizedClient(AsyncClient):
         :param limit: maximum number of orders for each symbol for each state (open, close)
         :return: iterator of orders definitions sorted from open to close
         """
-        if len(symbols) == 0:
+        if not symbols:
             markets = await self.fetch_markets()
             symbols = [sym.name for sym in markets]
         for symbol in symbols:
@@ -235,7 +236,7 @@ class AsyncAuthorizedClient(AsyncClient):
         :param limit: maximum number of trades for each symbol
         :return: iterator of trade definition
         """
-        if len(symbols) == 0:
+        if not symbols:
             markets = await self.fetch_markets()
             symbols = [sym.name for sym in markets]
         for symbol in symbols:
@@ -303,8 +304,7 @@ class AsyncAuthorizedClient(AsyncClient):
         except APIError as err:
             if 'not found' in err.text:
                 return None
-            else:
-                raise
+            raise
         return Order.from_json(response)
 
     async def fetch_history(self, begin: datetime, end: datetime, currency: str) -> AsyncIterator[Ticker]:
