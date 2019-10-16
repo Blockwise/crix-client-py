@@ -1,6 +1,6 @@
 # CRIX.io official client
 ![PyPI - License](https://img.shields.io/pypi/l/crix.svg)
-![PyPI](https://img.shields.io/pypi/v/crix.svg)
+[![PyPI](https://img.shields.io/pypi/v/crix.svg)](https://pypi.org/project/crix/)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/crix.svg)
 [![Documentation Status](https://readthedocs.org/projects/crix/badge/?version=latest)](https://crix.readthedocs.io/en/latest/?badge=latest)
 
