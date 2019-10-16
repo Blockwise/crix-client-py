@@ -195,9 +195,20 @@ class OrderStatus(Enum):
     cancel = 2
 
 
+class OrderType(Enum):
+    limit = 0
+    market = 1
+    stop_loss = 2
+    stop_loss_limit = 3
+    stop_loss_range = 4  # deprecated
+    take_profit = 5
+    take_profit_limit = 6
+
+
 class Order(NamedTuple):
     id: int
     user_id: int
+    type: OrderType
     symbol_name: str
     is_buy: bool
     quantity: Decimal
@@ -218,6 +229,7 @@ class Order(NamedTuple):
         return Order(
             id=info['orderId'],
             user_id=info['userId'],
+            type=OrderType(info.get('type', 0)),
             symbol_name=info['symbolName'],
             is_buy=info['isBuy'],
             quantity=Decimal(info['quantity'] or '0'),
@@ -234,6 +246,7 @@ class Order(NamedTuple):
 
 
 class NewOrder(NamedTuple):
+    type: OrderType
     symbol: str
     price: Decimal
     quantity: Decimal
@@ -247,6 +260,7 @@ class NewOrder(NamedTuple):
         Build JSON package ready to send to the API endpoint
         """
         req = {
+            "type": self.type.value,
             "isBuy": self.is_buy,
             "price": str(self.price),
             "quantity": str(self.quantity),
@@ -272,7 +286,8 @@ class NewOrder(NamedTuple):
         :param args: additional parameters proxied to the NewOrder constructor
         :return: new order
         """
-        return NewOrder(symbol=symbol,
+        return NewOrder(type=OrderType.limit,
+                        symbol=symbol,
                         price=Decimal(price),
                         quantity=Decimal(quantity),
                         is_buy=is_buy,
@@ -289,7 +304,8 @@ class NewOrder(NamedTuple):
         :param args: additional parameters proxied to the NewOrder constructor
         :return: new order
         """
-        return NewOrder(symbol=symbol,
+        return NewOrder(type=OrderType.market,
+                        symbol=symbol,
                         price=Decimal('0'),
                         quantity=Decimal(quantity),
                         is_buy=is_buy,
