@@ -336,11 +336,11 @@ class Trade(NamedTuple):
             created_at=datetime.fromtimestamp(info['createdAt'] / 1000),
             order_filled=info.get('orderFilled', False),
             is_buy=info['isBuy'],
-            order_id=info['orderId'],
+            order_id=info.get('orderId', 0),
             price=Decimal(info['price']),
             quantity=Decimal(info['quantity']),
             fee=Decimal(info['fee'] or '0'),
-            fee_currency=info['feeCurrency'],
+            fee_currency=info.get('feeCurrency', ''),
             symbol_name=info['symbolName'],
             user_id=info.get('userId', 0),
         )

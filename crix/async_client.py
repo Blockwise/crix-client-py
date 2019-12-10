@@ -8,9 +8,6 @@ from .client import APIError
 from .models import Ticker, Resolution, NewOrder, Order, Symbol, Depth, Trade, Account, Ticker24
 
 
-
-
-
 class AsyncClient:
     """
     HTTP client to the exchange for non-authorized requests.
@@ -125,6 +122,27 @@ class AsyncClient:
         for info in (data['ohlc'] or []):
             tickers.append(Ticker.from_json(info))
         return tickers
+
+    async def fetch_trades(self, symbol: str, limit: int = 100) -> List[Trade]:
+        """
+        Get last trades for specified symbol name. OrderID, UserID, Fee, FeeCurrency will be empty (or 0)
+
+        :param symbol: symbol name
+        :param limit: maximum number of trades (could not be more then 1000)
+        :return: list of trades
+        """
+        async with self._session.post(self._base_url + '/trades', json={
+            'req': {
+                'symbolName': symbol,
+                'limit': limit,
+            }
+        }) as req:
+            await APIError.async_ensure('fetch-trades', req)
+            data = await req.json()
+        trades = []
+        for info in (data['trades'] or []):
+            trades.append(Trade.from_json(info))
+        return trades
 
 
 class AsyncAuthorizedClient(AsyncClient):

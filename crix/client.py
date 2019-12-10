@@ -179,6 +179,27 @@ class Client:
             tickers.append(Ticker.from_json(info))
         return tickers
 
+    def fetch_trades(self, symbol: str, limit: int = 100) -> List[Trade]:
+        """
+        Get last trades for specified symbol name. OrderID, UserID, Fee, FeeCurrency will be empty (or 0)
+
+        :param symbol: symbol name
+        :param limit: maximum number of trades (could not be more then 1000)
+        :return: list of trades
+        """
+        req = self._session.post(self._base_url + '/trades', json={
+            'req': {
+                'symbolName': symbol,
+                'limit': limit,
+            }
+        })
+        APIError.ensure('fetch-trades', req)
+        data = req.json()
+        trades = []
+        for info in (data['trades'] or []):
+            trades.append(Trade.from_json(info))
+        return trades
+
 
 class AuthorizedClient(Client):
     """
