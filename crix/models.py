@@ -12,8 +12,6 @@ class Symbol(NamedTuple):
     quote_precision: int
     description: str
     level_aggregation: List[int]
-    maker_fee: Decimal
-    taker_fee: Decimal
     min_lot: Decimal
     max_lot: Decimal
     min_price: Decimal
@@ -36,8 +34,6 @@ class Symbol(NamedTuple):
             quote_precision=info['quotePrecision'],
             description=info['desc'],
             level_aggregation=info['levelAggregation'],
-            maker_fee=Decimal(info['makerFee']),
-            taker_fee=Decimal(info['takerFee']),
             min_lot=Decimal(info['minLot']),
             max_lot=Decimal(info['maxLot']),
             min_price=Decimal(info['minPrice']),
@@ -366,4 +362,21 @@ class Account(NamedTuple):
             locked_balance=Decimal(info['lockedBalance'] or '0'),
             currency_name=info['currencyName'],
             deposit_address=info['depositAddress']
+        )
+
+
+class VolumeFee(NamedTuple):
+    min_volume: Decimal
+    maker_fee: Decimal
+    taker_fee: Decimal
+
+    @staticmethod
+    def from_json(info: dict) -> 'VolumeFee':
+        """
+        Construct object from dictionary
+        """
+        return VolumeFee(
+            min_volume=Decimal(info.get('minVolume', '0')),
+            maker_fee=Decimal(info.get('makerFee', '0')),
+            taker_fee=Decimal(info.get('takerFee', '0')),
         )

@@ -8,7 +8,7 @@ import requests
 
 from aiohttp import ClientResponse
 
-from .models import Ticker, Resolution, NewOrder, Order, Symbol, Depth, Trade, Account, Ticker24
+from .models import Ticker, Resolution, NewOrder, Order, Symbol, Depth, Trade, Account, Ticker24, VolumeFee
 
 
 class APIError(RuntimeError):
@@ -199,6 +199,22 @@ class Client:
         for info in (data['trades'] or []):
             trades.append(Trade.from_json(info))
         return trades
+
+    def fetch_volume_fees(self, symbol: str) -> List[VolumeFee]:
+        """
+        Get fees by volume for the symbol. Volume fees returned in unsorted way.
+
+        :param symbol: symbol name
+        :return: list of volume fee
+        """
+        req = self._session.post(self._base_url + '/info/fee/volume', json={
+            'req': {
+                'symbolName': symbol,
+            }
+        })
+        APIError.ensure('fetch-volume-fees', req)
+        data = req.json()
+        return [VolumeFee.from_json(record) for record in data['fees']]
 
 
 class AuthorizedClient(Client):

@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple, AsyncIterator
 from aiohttp import ClientSession
 
 from .client import APIError
-from .models import Ticker, Resolution, NewOrder, Order, Symbol, Depth, Trade, Account, Ticker24
+from .models import Ticker, Resolution, NewOrder, Order, Symbol, Depth, Trade, Account, Ticker24, VolumeFee
 
 
 class AsyncClient:
@@ -143,6 +143,23 @@ class AsyncClient:
         for info in (data['trades'] or []):
             trades.append(Trade.from_json(info))
         return trades
+
+    async def fetch_volume_fees(self, symbol: str) -> List[VolumeFee]:
+        """
+        Get fees by volume for the symbol. Volume fees returned in unsorted way.
+
+        :param symbol: symbol name
+        :return: list of volume fee
+        """
+
+        async with self._session.post(self._base_url + '/info/fee/volume', json={
+            'req': {
+                'symbolName': symbol,
+            }
+        }) as req:
+            await APIError.async_ensure('fetch-volume-fees', req)
+            data = await req.json()
+        return [VolumeFee.from_json(record) for record in data['fees']]
 
 
 class AsyncAuthorizedClient(AsyncClient):
