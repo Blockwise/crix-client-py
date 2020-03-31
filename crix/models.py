@@ -11,7 +11,7 @@ class Symbol(NamedTuple):
     quote: str
     quote_precision: int
     description: str
-    level_aggregation: List[int]
+    level_aggregation: List[str]
     min_lot: Decimal
     max_lot: Decimal
     min_price: Decimal
@@ -33,7 +33,7 @@ class Symbol(NamedTuple):
             quote=info['quote'],
             quote_precision=info['quotePrecision'],
             description=info['desc'],
-            level_aggregation=info['levelAggregation'],
+            level_aggregation=info['strLevelAggregation'],
             min_lot=Decimal(info['minLot']),
             max_lot=Decimal(info['maxLot']),
             min_price=Decimal(info['minPrice']),
