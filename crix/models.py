@@ -20,6 +20,8 @@ class Symbol(NamedTuple):
     tick_lot: Decimal
     tick_price: Decimal
     is_trading: bool
+    maker_fee: Decimal
+    taker_fee: Decimal
 
     @staticmethod
     def from_json(info: dict) -> 'Symbol':
@@ -42,6 +44,8 @@ class Symbol(NamedTuple):
             tick_lot=Decimal(info['tickLot']),
             tick_price=Decimal(info['tickPrice']),
             is_trading=info['trading'],
+            maker_fee=Decimal(info.get('makerFee', '0')),
+            taker_fee=Decimal(info.get('takerFee', '0')),
         )
 
 
