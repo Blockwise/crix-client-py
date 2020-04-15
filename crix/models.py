@@ -162,7 +162,7 @@ class Depth(NamedTuple):
         """
         return Depth(
             symbol_name=info['symbolName'],
-            level_aggregation=info['levelAggregation'],
+            level_aggregation=info['strLevelAggregation'],
             last_update_id=info['lastUpdateId'],
             is_aggregated=info['aggregated'],
             asks=[Offer.from_json(offer) for offer in (info['asks'] or [])],

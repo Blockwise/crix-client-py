@@ -99,7 +99,7 @@ class Client:
             self.__market_cache = tuple(symbols)
         return self.__market_cache
 
-    def fetch_order_book(self, symbol: str, level_aggregation: Optional[int] = None) -> Depth:
+    def fetch_order_book(self, symbol: str, level_aggregation: Optional[str] = None) -> Depth:
         """
         Get order book for specific symbol and level aggregation
 
@@ -126,7 +126,7 @@ class Client:
             'symbolName': symbol
         }
         if level_aggregation is not None:
-            req['levelAggregation'] = level_aggregation
+            req['strLevelAggregation'] = level_aggregation
         req = self._session.post(self._base_url + '/depths', json={
             'req': req
         })
